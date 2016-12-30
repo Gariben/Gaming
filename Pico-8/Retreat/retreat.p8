@@ -43,7 +43,8 @@ function _init()
  	add(scre.hscr,{
  	name="jal",
  	scr=40-((i-1)*8),
- 	lyr=50-((i-1)*10)
+ 	lyr=50-((i-1)*10),
+ 	clr=3
  })
  end
  music(0,0,3)
@@ -89,6 +90,7 @@ end
 function _draw()
 	cls()
 	
+	
 	--draw background
 	for st in all(stars) do
 		pset(st.x,st.y,6)
@@ -100,15 +102,33 @@ function _draw()
 	--draw bar
 	for i,b in pairs(bar.blks) do
 		if (i>bar.w) then break end
+		palt(0,false)
 		spr(b.sp,b.x,b.y)
+		palt(0,true)
 	end
 	
 	--draw score
 	--print("scr " .. scre.val,4,4,12)
+	--check for high score
+	local newhgh=false
+	local scrstr="lyr"
+	for i,h in pairs(scre.hscr) do
+		if(scre.lyr>h.scr+1) then
+			newhgh=true
+			break
+		end
+	end
+	
+	if((scre.t%76)<38 and (newhgh == true)) then
+		scrstr="hgh"
+	end
+	
+	
+	
 	if(scre.lyr>0 and scre.lyr%10==0) then
-		print("lyr " .. scre.lyr,4,4,10)	
+		print(scrstr .. " " .. scre.lyr,4,4,10)	
 	else
-		print("lyr " .. scre.lyr,4,4,11)
+		print(scrstr .. " " .. scre.lyr,4,4,11)
 	end
 	if(scre.cmb>0) then
 		print("cmb " .. scre.cmb,4,10,scre.cmb+3)
@@ -128,6 +148,7 @@ function _draw()
 	end	
 
 	--draw top
+	palt(0,false)
 	for t in all(top) do
 		spr(t.sp,t.x,t.y)
 	end
@@ -136,6 +157,7 @@ function _draw()
 	for l in all(layers) do
 		spr(l.sp,l.x,l.y)
 	end
+	palt(0,true)
 	
 	--draw misses
 	for m in all(misses) do
@@ -161,14 +183,19 @@ function _draw()
 		print(scre.lyr .. " stories",gmox+10,gmoy+20,3)		
 		print(scre.lyr,gmox+10,gmoy+20,9)		
 		line(gmox,gmoy+27,gmox+gmow,gmoy+27,3)
-		print("high scores:",gmox+6,gmoy+30,3)
+		print("high scores:",gmox+6,gmoy+30,3)	
+
+		--todo fix high score replace
+		
+		
+
 		for i,h in pairs(scre.hscr) do
 			local lyrstr=""		
 			if(h.lyr<1000) then lyrstr = "0" .. lyrstr end
 			if(h.lyr<100)		then lyrstr =	"0"	.. lyrstr	end
 			if(h.lyr<10)			then lyrstr = "0" .. lyrstr end
 			lyrstr = lyrstr .. h.lyr
-			print(i .. "." .. h.name .. " " .. lyrstr,gmox+10,gmoy+22+((i+1)*8))
+			print(i .. "." .. h.name .. " " .. lyrstr,gmox+10,gmoy+22+((i+1)*8),h.clr)
 		end
 line(gmox,gmoy+77,gmox+gmow,gmoy+77,3)
 		print("press z",gmox+15,gmoy+80,3)
