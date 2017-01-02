@@ -16,10 +16,8 @@ function _init()
  
  if(scene == 0) then
 		title_init() 
- 
  elseif(scene == 1) then
- 
- 
+ 	intro_init()
  elseif(scene == 2) then
 		gameplay_init()
 	end
@@ -30,6 +28,12 @@ function title_init()
 
 	ttlbar={strtx=12,endx=116,x=12,w=8,dx=1}
 
+end
+
+function intro_init()
+
+	ctscn={t=0,over=false}
+	
 end
 
 
@@ -81,7 +85,7 @@ function _update()
  if(scene == 0) then
  	title_update()
  elseif(scene == 1) then
- 	
+ 	intro_update()
  elseif(scene == 2) then
 		gameplay_update()
 	end
@@ -98,10 +102,23 @@ function title_update()
 
 		if btnp(4) then
 			sfx(13)	
-			scene=2
+			scene=1
 			return
 		end
 
+end
+
+function intro_update()
+	ctscn.t+=1
+	
+	if(btnp(4)) then
+		ctscn.over=true
+	end
+	
+	if(ctscn.over == true) then
+			scene=2
+	end
+	
 end
 
 function gameplay_update()
@@ -146,18 +163,18 @@ function _draw()
 	cls()
  if(scene == 0) then
 		if(oscn ~= 0) then
-		 gameplay_init()
+		 title_init()
 			oscn=0
 		end
-
 		title_draw() 
  
  elseif(scene == 1) then
 		if(oscn ~= 1) then
-		 gameplay_init()
+		 intro_init()
 			oscn=1
 		end
- 
+ 	intro_draw()
+
  elseif(scene == 2) then
 		if(oscn ~= 2) then
 		 gameplay_init()
@@ -169,7 +186,6 @@ function _draw()
 end
 
 function title_draw()
-
 
 	for i=1,8 do
 		spr(2,ttlbar.x+blkw*(i-1),48)
@@ -199,6 +215,45 @@ function title_draw()
 
 	--spr(75,24,120)
 	--print("2016 jacobu games",34,120+2,7)
+
+end
+
+function intro_draw()
+
+	iln1="the last of the earth-movers,"
+	iln2="who were long forsaken, has"
+	iln3="been made to walk amongst the" 
+	iln4="living, to build for his captor"
+	iln5="what will be his final creation:"
+	iln6="a tower to imprison from the"
+	iln7="surface an unquestionable evil."	
+	iln8="will your tower be enough to "
+	iln9="protect those below?"
+	iln10="‘ press z to begin ‹"
+
+	fadeintext(ctscn.t,iln1,0,4,30,20)
+	fadeintext(ctscn.t,iln2,0,12,60,20)
+	fadeintext(ctscn.t,iln3,0,20,90,20)
+	fadeintext(ctscn.t,iln4,0,28,120,20)
+	fadeintext(ctscn.t,iln5,0,36,150,20)
+	fadeintext(ctscn.t,iln6,4,60,250,20)
+	fadeintext(ctscn.t,iln7,4,68,250,20)
+	
+	--todo:this gross
+	if(ctscn.t>250+20*2) then
+		print("unquestionable evil",48,68,8)
+	end
+	
+	fadeintext(ctscn.t,iln8,8,100,350,20)
+	fadeintext(ctscn.t,iln9,24,108,350,20)
+
+	--todo:this gross
+	if(ctscn.t>350+20*2) then
+		print(iln8,8,100,9)
+		print(iln9,24,108,9)
+	end
+	
+	fadeintext(ctscn.t,iln10,20,120,400,20)
 
 end
 
@@ -315,40 +370,11 @@ line(gmox,gmoy+77,gmox+gmow,gmoy+77,3)
 	end
 end
 
-function rndblk(x)
- local nx=x
- --made need to debug this phrase
-	if(x%blkw>4) then
- 	nx=x+(blkw-x%blkw)
- else
- 	nx=x-(x%blkw)
- end
-		
-	return nx
-end
-
-function shortenbar(x,frmtail)
-
-	if(lost<bar.w) then
-		for i=1,lost,1 do
-			if(frmtail) then
-				del(bar.blks,bar.blks[(bar.w+i)-i])
-			else
-				del(bar.blks,bar.blks[i])
-			end
-			bar.w-=1
-		end
-	else
-		gmovr=true
-	end
-	lost=0
-
-end
 
 
 
 --------------------------------
---non-core functions
+--title functions
 --------------------------------
 
 function drawtitle(x,y,clr)
@@ -445,7 +471,29 @@ function drawsub(tx,ty)
 	spr(74,tx+76,ty)
 end
 
+--------------------------------
+--intro functions
+--------------------------------
 
+function fadeintext(t,str,x,y,i,d)
+
+	if(t>i) then
+		print(str,x,y,5)
+	end
+	
+	if(t>i+d) then
+		print(str,x,y,6)
+	end
+	
+	if(t>i+d*2) then
+		print(str,x,y,7)
+	end	
+	
+end
+
+--------------------------------
+--gameplay functions
+--------------------------------
 
 
 function bardrop()
@@ -625,9 +673,41 @@ function bardrop()
 	
 end
 
+function rndblk(x)
+ local nx=x
+ --made need to debug this phrase
+	if(x%blkw>4) then
+ 	nx=x+(blkw-x%blkw)
+ else
+ 	nx=x-(x%blkw)
+ end
+		
+	return nx
+end
+
+function shortenbar(x,frmtail)
+
+	if(lost<bar.w) then
+		for i=1,lost,1 do
+			if(frmtail) then
+				del(bar.blks,bar.blks[(bar.w+i)-i])
+			else
+				del(bar.blks,bar.blks[i])
+			end
+			bar.w-=1
+		end
+	else
+		gmovr=true
+	end
+	lost=0
+
+end
+
+
 function explosion(x,y)
 
 end
+
 
 
 
