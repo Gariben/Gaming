@@ -393,12 +393,13 @@ function gameplay_draw()
 				c.clr=6
 			elseif (c.t>10 and c.t<14) then
 				c.clr=5
-			elseif (c.t>14 and c.t<18) then
 				c.r=2
-			elseif (c.t>18 and c.t<22) then
+			elseif (c.t>14 and c.t<18) then
 				c.r=1
-			elseif (c.t>14) then
+			elseif (c.t>18 and c.t<22) then
 				del(m.chunks,c)
+			elseif (c.t>14) then
+
 			end
 		end
 	end
