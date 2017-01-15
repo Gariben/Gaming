@@ -1,9 +1,9 @@
 ## Retreat
-
-![alt text](http://i.imgur.com/rQXXIoD.png "Title screen still")
-
+![Title screenshot](http://i.imgur.com/UxsmqG3.gif)
 
 Retreat is a "stack-up puzzle" style game I made to learn on the Pico-8 platform. 
+
+![Gameplay screenshot](http://i.imgur.com/UFEnTG8.gif)
 
 Not satisifed with the base game, I decided to expand on it to include several special effects and a small background story.
 All music, graphics and programming are my design, unless otherwise noted. 
