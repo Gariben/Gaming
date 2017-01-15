@@ -16,6 +16,6 @@ The .p8 cart itself can be played on the Pico-8 platform on Windows, Linux, Mac 
 
 Existing To do list before publishing to Pico-8:
 + Add intro cutscene after text scroll
-+ Fix high score system 
++ Add high score name entry
 + Add a few more graphical effects as you ascend
 + Add a few more sprites, music and sfx where needed
