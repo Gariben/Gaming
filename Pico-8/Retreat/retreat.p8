@@ -10,6 +10,10 @@ blkh=8
 scrn=1
 gmovr=false
 trk=0
+hghscr={}
+sethghscr=true
+
+
 
 function _init()
  cls()
@@ -69,15 +73,23 @@ function gameplay_init()
  })
  end
 	base= {sp=1,x=32,y=88,w=8,h=5,on=true,endx=0}
-	scre={lyr=0,val=0,t=0,gmovrt=0,cmb=0,hscr={}}
- for i=1,5 do
- 	add(scre.hscr,{
- 	name="jal",
- 	scr=40-((i-1)*8),
- 	lyr=50-((i-1)*10),
- 	clr=0
- })
+	scre={lyr=0,val=0,t=0,gmovrt=0,cmb=0,ckhghscr=true}
+ if (sethghscr==true) then
+	 for i=1,5 do
+	 	add(hghscr,{
+	 	name="jal",
+	 	scr=40-((i-1)*8),
+	 	lyr=25-((i-1)*5),
+	 	clr=0
+	 })
+	 end
+	 sethghscr=false
  end
+ 
+ for h in all(hghscr) do
+ 	h.clr=0
+ end
+ 
  music(0,0,3)
 end
 
@@ -89,10 +101,13 @@ function credits_init()
 	hearts = {}
 	
 	 for i=1,3 do
+	 	rndo=(rnd()*((90-24)+1))
+	 	rndo=rndo-rndo%16
  		add(hearts,{
- 			x=24+(rnd()*((100-24)+1)),
+ 			x=24+rndo,
  			y=24,
- 			s="‡"
+ 			s="‡",
+ 			clr=8
  			})
  	end
 
@@ -194,6 +209,29 @@ end
 function credits_update()
 
 	crdts.t+=1
+
+	for i,h in pairs(hearts) do
+		if(h.y<7) then
+	 	rndo=36+(rnd()*((90-24)+1))
+	 	rndo=rndo-rndo%16
+	 	h.x=rndo
+	 	h.y=20	
+	 	h.s="‡"
+	 	h.clr=8	
+		end
+		
+		if(crdts.t>76 and crdts.t%7==0 or crdts.t%7==4) then
+
+			h.y-=1
+			h.x=h.x+(1*cos((crdts.t/2)))
+		end
+		
+		if(h.y<8) then
+			h.clr=5
+			h.s="„"
+		end
+	
+	end
 
 
 	--e„h‡
@@ -329,7 +367,7 @@ function gameplay_draw()
 	--check for high score
 	local newhgh=false
 	local scrstr="lyr"
-	for i,h in pairs(scre.hscr) do
+	for i,h in pairs(hghscr) do
 		if(scre.lyr>h.scr+1) then
 			newhgh=true
 			break
@@ -433,7 +471,18 @@ function gameplay_draw()
 
 		--todo fix high score replace
 		
-		for i,h in pairs(scre.hscr) do
+
+		for i,h in pairs(hghscr) do
+			if ((scre.lyr > h.lyr) and (scre.ckhghscr==true)) then
+				h.name= "you"
+				h.lyr= scre.lyr
+				h.clr=10
+				scre.ckhghscr=false
+			end		
+		end
+
+		
+		for i,h in pairs(hghscr) do
 			local lyrstr=""		
 			if(h.lyr<1000) then lyrstr = "0" .. lyrstr end
 			if(h.lyr<100)		then lyrstr =	"0"	.. lyrstr	end
@@ -441,7 +490,10 @@ function gameplay_draw()
 			lyrstr = lyrstr .. h.lyr
 			print(i .. "." .. h.name .. " " .. lyrstr,gmox+10,gmoy+22+((i+1)*8),h.clr)
 		end
-		line(gmox,gmoy+77,gmox+gmow,gmoy+77)
+		
+		
+		
+		line(gmox,gmoy+77,gmox+gmow,gmoy+77,0)
 		print("‘z to play‹",gmox+4,gmoy+80)
 		print("z",gmox+12,gmoy+80,9)
 		print("‘x to quit‹",gmox+4,gmoy+86,0)
@@ -454,18 +506,21 @@ function credits_draw()
 	cln2="graphics, music and programming by"
 	cln3="by jacobu (@jacobarlo)"
 	cln4="block texture from jelpi" 
-	cln5="my next pico-8 project will take"
-	cln6="place where this one left off."
-
+	cln5="see you in my next project!"
 	fadeintext(crdts.t,cln1,24,24,36,20)
+	if(crdts.t>36+20*2) then
+		for i,h in pairs(hearts) do
+			print(h.s,h.x,h.y,h.clr)
+		end
+	end
+	
 	fadeintext(crdts.t,cln2,0,42,60,20)
 	fadeintext(crdts.t,cln3,18,50,90,20)
 	if(crdts.t>90+20*2) then
 		print("@jacobarlo",62,50,8)
 	end
 	fadeintext(crdts.t,cln4,12,60,120,20)
-	fadeintext(crdts.t,cln5,0,114,200,20)
-	fadeintext(crdts.t,cln6,0,122,200,20)
+	fadeintext(crdts.t,cln5,8,114,200,20)
 end
 
 
