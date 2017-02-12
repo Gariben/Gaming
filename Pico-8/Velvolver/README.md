@@ -9,3 +9,6 @@ an ultimate attack inspired by Overwatch, and an active reloading system inspire
 It is a condensed Proof-of-concept for a game I would like to expand on in Unity.
 All music, graphics and programming are my design, unless otherwise noted.
 
+Work-in-progress GIF as of 2/12/2017:
+
+![WIP 2/12/2017 GIF](http://imgur.com/Dx8ZMxQ)
