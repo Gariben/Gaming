@@ -14,7 +14,9 @@ end
 function game_init()
 	
 	s={h=100,s=100,u=0,b=6,r=false,rx=83,rs=true}
-	p={x=64,y=64,sp=64,r=false,s=false}
+	p={x=64,y=64,d=0,sp=64,tsp=64,rld=false,rl=false,rlc=20,s=false}
+	b={}
+	c={x=p.x,y=p.y}
 	
 	--ui elements
 	ui={by=20}
@@ -28,6 +30,7 @@ end
 
 function game_draw()
 	cls()
+	rectfill(0,0,127,127,5)
 	player_draw()
 	ui_draw()
 end
@@ -38,41 +41,69 @@ function _update()
 end
 
 function game_update()
+	--fire bullets
+	for i,g in pairs(b) do
+		g.x+=g.dx
+		g.y+=g.dy
+		
+		--add splat mechanics here
+		if(g.x<0 or g.x>127 or g.y<0 or g.y>127) then del(b,g) end
+	end
+	
+	
+	
+	
 	--movements
 	
 	--primitive
-	if(btn(0) and btn(2)) then
-	--top left
-		p.sp=83
-		p.y-=1
-		p.x-=1
-	elseif(btn(0) and btn(3)) then
-	--left down
-		p.sp=82	
-		p.x-=1
-		p.y+=1
-	elseif(btn(1) and btn(2)) then
-	--top right
-		p.sp=80	
-		p.x+=1
-		p.y-=1
-	elseif(btn(1) and btn(3)) then
-	--right down
-		p.sp=81	
-		p.x+=1
-		p.y+=1
-	elseif(btn(0)) then
-		p.sp=67
-		p.x-=1
-	elseif(btn(1)) then
-		p.sp=65	
-		p.x+=1
-	elseif(btn(2)) then
-		p.sp=64
-		p.y-=1
-	elseif(btn(3)) then
-		p.sp=66
-		p.y+=1
+	if(p.rld==false and p.rl==false and p.s==false) then
+		if(btn(0) and btn(2)) then
+			upleft(p,83,7)
+		elseif(btn(0) and btn(3)) then
+			leftdown(p,82,5)
+		elseif(btn(1) and btn(2)) then
+			upright(p,80,4)
+		elseif(btn(1) and btn(3)) then
+			rightdown(p,81,6)
+		elseif(btn(0)) then
+			left(p,67,3)
+		elseif(btn(1)) then
+			right(p,65,1)
+		elseif(btn(2)) then
+			up(p,64,0)
+		elseif(btn(3)) then
+			down(p,66,2)
+		end
+	elseif (p.rl==true) then
+		if(p.d==0) then
+			p.y-=2
+		elseif(p.d==1) then
+			p.x+=2		
+		elseif(p.d==2) then
+			p.y+=2		
+		elseif(p.d==3) then
+			p.x-=2
+		elseif(p.d==4) then
+			p.x+=2
+			p.y-=2
+		elseif(p.d==5) then
+			p.x+=2
+			p.y+=2
+		elseif(p.d==6) then
+			p.x-=2
+			p.y+=2
+		elseif(p.d==7) then
+			p.x-=2		
+			p.y-=2
+		end
+
+		p.rlc-=1
+	
+	elseif (p.rld==true) then
+	
+	elseif (p.s==true) then
+
+
 	end
 	
 	if(p.x<0)then p.x=0 end 
@@ -86,13 +117,13 @@ function game_update()
 		ult()
 		elseif(btnp(5)) then
 			roll()
-		elseif(btnp(4)) then
+		elseif(p.rl==false and btnp(4)) then
 			--shots fired!
 			gun()
 	end
 	
 	
-	
+	--active reload
 	if(s.r==true and s.rx<124) then
 		s.rx+=2
 	elseif(s.r==true and s.rx>=124) then
@@ -104,16 +135,25 @@ function game_update()
 	end
 	
 	--refresh values
+	
+	--stamina
 	if(s.s<100) then
 		s.s+=2
 	end
 	
+	--ult
 	if(s.u>100) then 
 		s.u=100
 	elseif (s.u<0) then
 		s.u=0
 	end
 	
+	--end roll
+	if(p.rl==true and p.rlc<=0) then
+		p.sp-=4
+		p.rl=false
+		p.rlc=20
+	end
 
 	
 end
@@ -217,55 +257,199 @@ function ui_draw()
 	if(s.r==true and s.rx<124) then
 		line(s.rx,ui.by-4,s.rx,ui.by,10)
 	end
+
 end
 
 function player_draw()
-
+	rectfill(p.x,p.y+7,p.x+7,p.y+8,0)
 	spr(p.sp,p.x,p.y)
-
-end
-
-
-
-function gun()
-		
-		if(s.r==false) then
-			if(s.b>1) then
-			--regular shot
-				sfx(0,0,0)
-				s.b=s.b-1
-			elseif(s.b==1 and s.rs==true) then
-			--power shot
-				sfx(1,0,0)		
-				s.b=s.b-1	
-			elseif(s.b==1) then
-			--regular shot
-				sfx(0,0,0)
-				s.b=s.b-1		
-			else
-				sfx(2,0,0)
-				s.rx=83
-				s.r=true	
-			--reload
+	
+		for i,g in pairs(b) do
+			if(g.x<p.x or g.x>p.x+7 or g.y<p.y or g.y>p.y+7) then
+				if(g.pwr) then
+					pset(g.x,g.y,2)						
+				else
+					pset(g.x,g.y,6)				
+				end
+				
+				
+				if(g.pwr) then
+					pset(g.x-(g.dx/6),g.y-(g.dy/6),2)
+					local l
+					if(t%2==0) then l=4 else l=3 end
+					for j=2,l,1 do
+						pset(g.x-j*(g.dx/6),g.y-j*(g.dy/6),8)
+					end				
+				else
+				
+					pset(g.x-(g.dx/6),g.y-(g.dy/6),6)
+					local l
+					if(t%2==0) then l=4 else l=3 end
+					for j=2,l,1 do
+						pset(g.x-j*(g.dx/6),g.y-j*(g.dy/6),7)
+					end
+				end
 			end
-		else
-			if(s.rx>=100 and s.rx<106) then
-				sfx(3,0,0)
-				s.u+=10
-				s.rs=true
-			else
-				sfx(4,0,0)
-				s.rs=false
-			end
-			s.b=6
-			s.r=false
 		end
 
 end
 
+function up(a,sp,d)
+	p.sp=sp	
+	p.y-=1
+	a.d=d
+	--just like me
+end
+function upright(a,sp,d)
+	p.sp=sp	
+	p.x+=1
+	p.y-=1
+	a.d=d
+end
+function right(a,sp,d)
+	p.sp=sp	
+	p.x+=1
+	a.d=d
+end
+function rightdown(a,sp,d)
+	p.sp=sp	
+	p.x+=1
+	p.y+=1
+	a.d=d
+end
+function down(a,sp,d)
+	p.sp=sp	
+	p.y+=1
+	a.d=d
+end
+function leftdown(a,sp,d)
+	p.sp=sp	
+	p.x-=1
+	p.y+=1
+	a.d=d
+end
+function left(a,sp,d)
+	a.sp=sp
+	a.x-=1
+	a.d=d
+end
+function upleft(a,sp,d)
+	a.sp=sp
+	a.y-=1
+	a.x-=1
+	a.d=d
+end
+
+
+function gun()
+	local bx=p.x
+	local by=p.y
+	local bdx=0
+	local bdy=0
+	local bv=6
+	local bpwr=false
+	local shoot=true
+	if(p.d==0) then
+		bx=p.x+6
+		by=p.y+2
+		bdy=-bv
+	elseif(p.d==1) then
+		bx=p.x+6
+		by=p.y+6
+		bdx=bv
+	elseif(p.d==2) then
+		bx+=1
+		bdy=bv
+	elseif(p.d==3) then
+		bx+=2
+		by+=1
+		bdx=-bv
+	elseif(p.d==4) then
+		bx+=7
+		by+=3
+		bdx=bv
+		bdy=-bv
+	elseif(p.d==5) then
+		by+=4
+		bdx=-bv
+		bdy=bv
+	elseif(p.d==6) then
+		bx+=3
+		by+=7
+		bdx=bv
+		bdy=bv
+	elseif(p.d==7) then
+		bx+=4
+		bdx=-bv
+		bdy=-bv
+	end	
+	
+	
+	if(s.r==false) then
+		if(s.b>1) then
+		--regular shot
+			sfx(0,0,0)
+			s.b=s.b-1
+			local g = {
+				x=bx,
+				y=by,
+				dx=bdx,
+				dy=bdy,
+				pwr=false
+			}
+			add(b,g)
+		elseif(s.b==1 and s.rs==true) then
+		--power shot
+			sfx(1,0,0)		
+			s.b=s.b-1
+			bpwr=true
+		elseif(s.b==1) then
+		--regular shot
+			sfx(0,0,0)
+			s.b=s.b-1
+			
+		else
+			shoot=false
+			sfx(2,0,0)
+			s.rx=83
+			s.r=true	
+		--reload
+		end
+	else
+		if(s.rx>=100 and s.rx<106) then
+			sfx(3,0,0)
+			s.u+=5
+			s.rs=true
+		else
+			sfx(4,0,0)
+			s.rs=false
+		end
+		s.b=6
+		s.r=false
+	end
+
+	
+	if(shoot) then
+		local g = {
+			x=bx,
+			y=by,
+			dx=bdx,
+			dy=bdy,
+			pwr=bpwr
+		}
+		add(b,g)	
+	end
+	
+	
+end
+
 
 function roll()
+	
 	if(s.s==100) then
+		p.tsp=p.sp
+		p.sp+=4
+		p.rl=true
 		sfx(5,0,0)
 		s.s=s.s-98
 	end
@@ -413,7 +597,7 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000005400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
